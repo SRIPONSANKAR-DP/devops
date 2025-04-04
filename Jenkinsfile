@@ -1,23 +1,22 @@
 pipeline {
-  agent {
-    docker {
-      image 'node:18-alpine'
-    }
-  }
-
+  agent any
   environment {
     DOCKER_IMAGE = 'sriponsankar/devops'
-    TAG = 'latest'
   }
-
   stages {
     stage('Install Dependencies') {
+      agent {
+        docker {
+          image 'node:18-alpine'
+        }
+      }
       steps {
+        sh 'rm -rf node_modules package-lock.json'
         sh 'npm install'
       }
     }
 
-    stage('Build App') {
+    stage('Build React App') {
       steps {
         sh 'npm run build'
       }
@@ -25,20 +24,19 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        sh 'docker build -t $DOCKER_IMAGE:$TAG .'
+        sh 'docker build -t $DOCKER_IMAGE:latest .'
       }
     }
 
     stage('Push to DockerHub') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-          sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
-          sh 'docker push $DOCKER_IMAGE:$TAG'
+        withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
+          sh 'docker push $DOCKER_IMAGE:latest'
         }
       }
     }
 
-    stage('Deploy (optional)') {
+    stage('Deploy') {
       steps {
         sh 'kubectl apply -f deploy.yaml'
       }
