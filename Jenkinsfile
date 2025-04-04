@@ -1,5 +1,9 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'node:18-alpine'
+    }
+  }
 
   environment {
     DOCKER_IMAGE = 'sriponsankar/devops'
@@ -26,9 +30,6 @@ pipeline {
     }
 
     stage('Push to DockerHub') {
-      when {
-        expression { return env.DOCKER_USERNAME && env.DOCKER_PASSWORD }
-      }
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
           sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
@@ -39,7 +40,7 @@ pipeline {
 
     stage('Deploy (optional)') {
       steps {
-        sh 'docker run -d -p 80:80 $DOCKER_IMAGE:$TAG'
+        sh 'kubectl apply -f deploy.yaml'
       }
     }
   }
