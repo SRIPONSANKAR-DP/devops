@@ -12,7 +12,7 @@ pipeline {
       }
       steps {
         sh 'rm -rf node_modules package-lock.json'
-        sh 'npm install'
+        sh 'npm config set cache ./npm-cache --global && npm install'
       }
     }
 
