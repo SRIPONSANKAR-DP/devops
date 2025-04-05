@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        FRONTEND_IMAGE_NAME = "hotel-room-booking-and-management-frontend"
+        FRONTEND_IMAGE_NAME = "portfolio-frontend"
         IMAGE_TAG           = "latest"
         DOCKER_REPO         = "sriponsankar"
         KUBECONFIG          = "/var/lib/jenkins/.kube/config"
